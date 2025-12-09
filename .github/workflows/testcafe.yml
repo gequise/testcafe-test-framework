@@ -4,13 +4,26 @@ on:
 jobs:
   build:
     name: Install Node and launch TestCafe tests in Chrome
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-node@v3
         with:
           node-version: lts/*
       - uses: actions/checkout@v3
-      - name: Run TestCafe Tests
-        uses: DevExpress/testcafe-action@latest
+
+      - name: Cache npm
+        uses: actions/cache@v4
         with:
-          args: 'chrome:headless --no-sandbox --disable-gpu tests'
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TestCafe Tests
+        uses: DevExpress/testcafe-action@v1
+        with:
+          skip-install: true
+          args: 'chrome:headless --no-sandbox --disable-gpu --concurrency 2 --selector-timeout 10000 --assertion-timeout 20000 tests'

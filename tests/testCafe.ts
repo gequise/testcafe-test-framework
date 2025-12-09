@@ -10,7 +10,6 @@ test('Text typing basics', async t => {
         .typeText(loginPage.passwordInput, 'ABC123')
         .expect(loginPage.usernameInput.value).eql('gustavo')
         .click(loginPage.loginButton)
-        // .wait(500)
         .expect(loginPage.welcomeText.innerText).eql('Welcome gustavo gustavo', 'The Welcome text is correct');
 });
 
