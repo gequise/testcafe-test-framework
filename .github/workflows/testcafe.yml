@@ -9,8 +9,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: lts/*
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Run TestCafe Tests
         uses: DevExpress/testcafe-action@latest
         with:
-          args: chrome tests
+          args: 'chrome:headless --no-sandbox --disable-gpu tests'
