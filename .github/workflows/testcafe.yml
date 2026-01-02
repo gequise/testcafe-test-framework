@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Run TestCafe Tests
-        uses: devexpress/testcafe-action@v1.0.0
+        uses: devexpress/testcafe-action@latest
         with:
           skip-install: true
           args: 'chrome:headless --no-sandbox --disable-gpu --concurrency 2 --selector-timeout 10000 --assertion-timeout 20000 tests'
