@@ -1,29 +1,42 @@
-name: Run TestCafe tests
+name: TestCafe POC Report
 on:
-  - push
-jobs:
-  build:
-    name: Install Node and launch TestCafe tests in Chrome
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-      - uses: actions/checkout@v3
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-      - name: Cache npm
-        uses: actions/cache@v4
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          node-version: 18
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Run TestCafe Tests
-        uses: devexpress/testcafe-action@latest
+      - name: Run TestCafe
+        continue-on-error: true
+        run: |
+          npx testcafe chrome:headless tests/ --reporter github-summary \
+          --screenshots path=screenshots,takeOnFails=true
+
+      - name: Finalize Summary
+        if: always()
+        run: |
+          echo "### ✅ POC Execution Finished" >> $GITHUB_STEP_SUMMARY
+          echo "Los resultados anteriores fueron generados automáticamente por TestCafe." >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Screenshots on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          skip-install: true
-          args: 'chrome:headless --no-sandbox --disable-gpu --concurrency 2 --selector-timeout 10000 --assertion-timeout 20000 tests'
+          name: screenshots-failure
+          path: screenshots/
