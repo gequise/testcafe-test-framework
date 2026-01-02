@@ -19,23 +19,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
 
-      - name: Install
+      - name: Install Dependencies
         run: npm install
 
-      - name: Test
+      - name: Run Tests
+        # We use the built-in 'junit' reporter which is always available
         continue-on-error: true
         run: |
-          npx testcafe chrome:headless tests/ --reporter github-summary \
+          npx testcafe chrome:headless tests/ --reporter junit:report.xml \
           --screenshots path=screenshots,takeOnFails=true
 
-      - name: Summary
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
         if: always()
-        run: |
-          echo "## 🚀 Resultado del POC" >> $GITHUB_STEP_SUMMARY
+        with:
+          report_paths: '**/report.xml'
+          detailed_summary: true
+          include_passed: true
 
-      - name: Artifacts
+      - name: Upload Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
