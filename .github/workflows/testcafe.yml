@@ -1,42 +1,43 @@
 name: TestCafe POC Report
+
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
-  test:
+  e2e-tests:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install
         run: npm install
 
-      - name: Run TestCafe
+      - name: Test
         continue-on-error: true
         run: |
           npx testcafe chrome:headless tests/ --reporter github-summary \
           --screenshots path=screenshots,takeOnFails=true
 
-      - name: Finalize Summary
+      - name: Summary
         if: always()
         run: |
-          echo "### ✅ POC Execution Finished" >> $GITHUB_STEP_SUMMARY
-          echo "Los resultados anteriores fueron generados automáticamente por TestCafe." >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Resultado del POC" >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload Screenshots on Failure
+      - name: Artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshots-failure
+          name: screenshots
           path: screenshots/
