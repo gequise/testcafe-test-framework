@@ -23,20 +23,14 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Tests
-        # We use the built-in 'junit' reporter which is always available
+      - name: Run Tests and Generate Summary
         continue-on-error: true
         run: |
-          npx testcafe chrome:headless tests/ --reporter junit:report.xml \
-          --screenshots path=screenshots,takeOnFails=true
-
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v4
-        if: always()
-        with:
-          report_paths: '**/report.xml'
-          detailed_summary: true
-          include_passed: true
+          echo "## 🚀 TestCafe Execution Results" >> $GITHUB_STEP_SUMMARY
+          echo " " >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          npx testcafe chrome:headless tests/ --reporter list >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Screenshots
         if: failure()
